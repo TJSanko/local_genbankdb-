@@ -82,7 +82,7 @@ while [[ $# -gt 0 ]]; do
   -d|--dir)      INFILES=(`find ${WDIR}/ -maxdepth 1 -type f -iname "*.lst"`);  shift 1;;
   -h|--help)     echo -e "${USAGE}"                                           && exit 1;;
   -v|--version)  echo -e "-> Current version: ${VER}"                         && exit 1;;
-  *)             echo -e "${USAGE}[ERROR] Unknown parameter [$1]\n"         && exit 2;;
+  *)             echo -e "${USAGE}[ERROR] Unknown parameter [$1]\n"           && exit 2;;
  esac
 done
 
@@ -123,7 +123,6 @@ NFILES=$(($((${#ACCLST[@]} / $((${PER_FILE} * ${PER_LINE})))) +1))
 ##############
 ### PROGRAM
 ##############
-
 ### zeroes
 Z=$(for i in $(seq 0 $((`echo -n ${NFILES} | wc -c` -1)) ); do echo -n '0'; done);
 
@@ -154,23 +153,19 @@ for ACC in ${ACCLST[@]}; do
 done
 ACCDIC[$L]=`echo ${LINE} | sed -r 's/\,$//'`;
 
-#echo -e "${#ACCDIC[@]}\t${!ACCDIC[@]}"
-
+### initialize first files
 SHFILE=${WDIR}"/download_${TYPE}${Z}${I}.sh";
 DBFILE=${OUT}"/download_${TYPE}${Z}${I}.${TYPE}";
-unset TMP; #declare -a TMP
-#for N in ${!ACCDIC[@]}; do
+unset TMP;
 for N in $(sort -n /tmp/lines.tmp); do
   if [[ ${LN} -gt ${PER_FILE} ]]; then
      ### appending to the bottom of the file download checking function
      echo -en "if [[ -e \"${WDIR}/check_download.sh\" ]]; then\n eval ${WDIR}/check_download.sh ${DBFILE} ${PER_LINE} ${OUT} ${DB} ${TYPE} ${MODE} '" >>${SHFILES}
      echo -en `echo ${TMP} | sed -r 's/,$//'`"';\nfi" >>${SHFILE}
      chmod a=rwx ${SHFILE}
-     unset TMP;
-
-    ### naming new download files
-    ((NFILES--))
-    ((I++))
+    
+     ### naming new download files
+    ((NFILES--)); ((I++)); unset TMP;
     Z=$(for i in $(seq 0 $((`echo -n ${NFILES} | wc -c` -1)) ); do echo -n '0'; done);
     SHFILE=${WDIR}"/download_${TYPE}${Z}${I}.sh"
     DBFILE=${OUT}"/download_${TYPE}${Z}${I}.${TYPE}";
@@ -192,6 +187,7 @@ for N in $(sort -n /tmp/lines.tmp); do
   ### screen print outs
   echo -e "echo \"   - file: download_${TYPE}${Z}${I}\tline number: $N\"" >>${SHFILE}
   echo -e "sleep 1s" >>${SHFILE}
+
   ### download line
   echo -e " curl -N -# '${URL_PT1}${ACCDIC[$N]}${URL_PT2}' >> ${DBFILE}" >>${SHFILE};
   TMP+="${ACCDIC[$N]},"
@@ -208,7 +204,6 @@ chmod a=rwx ${SHFILE}
 ################
 ### Downloading
 ################
-
 if [[ ${DOWNLOAD} -eq 1 ]]; then
  echo -e "-> Downloading..."
  if [[ ${MULTI_THREADING} -eq 1 ]]; then ls ${WDIR}/download_*.sh | parallel -j ${NTHR} -n 1 -I % "eval %"; fi
