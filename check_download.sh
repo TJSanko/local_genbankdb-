@@ -2,7 +2,7 @@
 
 ########################################################
 ###  Script to download missing records from NCBI
-###  database. Utulizes list of accession numbers
+###  database. Utilizes list of accession numbers
 ###  provided as coma separated values. Requires:
 ###  - input file with potentially missing downloads
 ###  - amount sequences per line (max 300)
@@ -22,7 +22,6 @@
 ###
 ########################################################
 if ! [[ `uname -s` == 'Linux' ]]; then echo -e "\n\tYou need to run it on Linux machine\n" && exit 2; fi
-
 
 ### File with downloaded NCBI records
 INNCBI=$1
