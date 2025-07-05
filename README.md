@@ -1,4 +1,4 @@
-########################################################################
+<br>########################################################################</br>
 SYNOPIS:
     Scripts for automatic download genbank records based on file with
     list of accessionn numbers (or directory with those files).
