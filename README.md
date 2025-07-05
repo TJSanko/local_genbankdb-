@@ -1,12 +1,12 @@
 <br>########################################################################</br>
-SYNOPIS:
+<br>SYNOPIS:
     Scripts for automatic download genbank records based on file with
     list of accessionn numbers (or directory with those files).
     The files have to have '.lst' extension. Furthermore it allows to 
     dived the genbank files into genes and genome sequences and taxonomy
     table adapted for blast or qiime2 classifier analysis.
 ########################################################################
-
+</br>
 DATE:    01.07.2025
 VERSION: 1.0
 CREATOR: T.J.SANKO
