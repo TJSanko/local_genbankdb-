@@ -8,6 +8,9 @@
 ###  directory for the list files
 ###  runs on Linux/Unix systems only
 ###
+###  usage: ./acc2db.sh file.lst
+###         '-h' or '--help' as argument prints usage
+###
 ###  Date:01.07.2025        Created by T.J.Sanko
 ###                                    (CERI SA)
 ###
@@ -51,6 +54,8 @@ USAGE="
 ##############
 ### working directory
 WDIR=`realpath $(pwd) 2>/dev/null`
+### Enable/Disable search for multiple lists in current directory: 1 => ON; 0 => OFF;
+DIRON=0
 ### Automatic download after scripts created: 1 => ON; 0 => OFF (will require manual run of the download scripts)
 DOWNLOAD=0
 ### Clean up after I am done - delete files it created?: 1 => Yes; 0 => No
@@ -68,23 +73,23 @@ MODE='text'
 ### url fragments
 URL_PT1='https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db='${DB}'&id=';
 URL_PT2='&rettype='${TYPE}'&retmode='${MODE};
+### temporary file
+LINES=/tmp/lines.`date +%s`
 
 ### Checking provided parameters
 unset INFILES; declare -a INFILES;
 while [[ $# -gt 0 ]]; do
  case "$1" in
-  -D|--download) echo -e "-> Set to auto-download files"; DOWNLOAD=1;           shift 1;;
-  -C|--clean)    echo -e "-> Set to clean-up intermediate files"; CLEAN=1;      shift 1;;
-  -i|--infile)   INFILES=(`echo $2 |sed -r 's/.*\s//' | grep -i ".lst"`);       shift 2;;
-  -d|--dir)      INFILES=(`find ${WDIR}/ -maxdepth 1 -type f -iname "*.lst"`);  shift 1;;
-  -h|--help)     echo -e "${USAGE}"                                           && exit 1;;
-  -v|--version)  echo -e "-> Current version: ${VER}"                         && exit 1;;
-  *)             echo -e "${USAGE}[ERROR] Unknown parameter [$1]\n"           && exit 2;;
+  -i|--infile)   INFILES=(`echo $2 |sed -r 's/.*\s//' | grep -i ".lst"`);         shift 2;;
+  -d|--dir)      DIRON=1;                                                         shift 1;;
+  -D|--download) DOWNLOAD=1; echo -e "-> Set to auto-download files";             shift 1;;
+  -C|--clean)    CLEAN=1;    echo -e "-> Set to clean-up intermediate files";     shift 1;;
+  -h|--help)                 echo -e "${USAGE}"                                 && exit 1;;
+  -v|--version)              echo -e "-> Current version: ${VER}"               && exit 1;;
+  *)                         echo -e "${USAGE}[ERROR] Unknown parameter [$1]\n" && exit 2;;
  esac
 done
 
-#if [[ $2 =~ ^$ ]]; then i=1; INDIR=${WDIR}; else i=2; INDIR=`realpath $2`; fi;
-#  -i=* | --infile=*) INFILES=(`echo $1 | sed -r 's/.*=//' | grep -i ".lst"`); shift 1;;
 ### output directory
 OUT=${WDIR}'/ncbi_dl'
 mkdir -p -m a=rwx ${OUT}
@@ -92,6 +97,9 @@ mkdir -p -m a=rwx ${OUT}
 ##############
 ### CHECKUPS
 ##############
+### checking if --dir flag was provided
+if [[ ${DIRON} -eq 1 && ${#INFILES[@]} -eq 0 ]]; then INFILES=(`find ${WDIR}/ -maxdepth 1 -type f -iname "*.lst"`); fi
+
 ### checking up on LST files
 unset ACCLST; declare -a ACCLST
 for INFILE in ${INFILES[@]}; do
@@ -122,7 +130,6 @@ NFILES=$(($((${#ACCLST[@]} / $((${PER_FILE} * ${PER_LINE})))) +1))
 ##############
 ### zeroes
 Z=$(for i in $(seq 0 $((`echo -n ${NFILES} | wc -c` -1)) ); do echo -n '0'; done);
-
 ### lines initial count
 L=1
 ### accession number initial count
@@ -133,36 +140,35 @@ I=1
 LN=1
 
 ### reformatting accession list to dictionary
-if [[ -e "/tmp/lines.tmp" ]]; then rm -f /tmp/lines.tmp; fi
+if [[ -e "${LINES}" ]]; then rm -f ${LINES}; fi
 unset LINE ACCDIC TMP; declare -A ACCDIC; declare -A TMP;
 for ACC in ${ACCLST[@]}; do
  if [[ -n ${TMP[$ACC]} ]]; then continue; fi
  if [[ ${S} -eq ${PER_LINE} ]]; then
   ACCDIC[$L]=`echo ${LINE} | sed -r 's/\,$//'`;
-  echo ${L} >>/tmp/lines.tmp;
-  unset LINE;
-  S=0;
-  ((L++));
+  unset LINE; S=0; ((L++));
  fi
  LINE+="${ACC},";
  TMP[$ACC]=1;
+ echo ${L} >>${LINES};
  ((S++))
 done
 ACCDIC[$L]=`echo ${LINE} | sed -r 's/\,$//'`;
 
-### initialize first files
 SHFILE=${WDIR}"/download_${TYPE}${Z}${I}.sh";
 DBFILE=${OUT}"/download_${TYPE}${Z}${I}.${TYPE}";
-unset TMP;
-for N in $(sort -n /tmp/lines.tmp); do
+unset TMP; #declare -a TMP
+for N in $(sort -n ${LINES} | uniq); do
   if [[ ${LN} -gt ${PER_FILE} ]]; then
      ### appending to the bottom of the file download checking function
-     echo -en "if [[ -e \"${WDIR}/check_download.sh\" ]]; then\n eval ${WDIR}/check_download.sh ${DBFILE} ${PER_LINE} ${OUT} ${DB} ${TYPE} ${MODE} '" >>${SHFILES}
+     echo -en "if [[ -e \"${WDIR}/check_download.sh\" ]]; then\n eval ${WDIR}/check_download.sh ${DBFILE} ${PER_LINE} ${OUT} ${DB} ${TYPE} ${MODE} '" >>${SHFILE}
      echo -en `echo ${TMP} | sed -r 's/,$//'`"';\nfi" >>${SHFILE}
      chmod a=rwx ${SHFILE}
-    
-     ### naming new download files
-    ((NFILES--)); ((I++)); unset TMP;
+     unset TMP;
+
+    ### naming new download files
+    ((NFILES--))
+    ((I++))
     Z=$(for i in $(seq 0 $((`echo -n ${NFILES} | wc -c` -1)) ); do echo -n '0'; done);
     SHFILE=${WDIR}"/download_${TYPE}${Z}${I}.sh"
     DBFILE=${OUT}"/download_${TYPE}${Z}${I}.${TYPE}";
@@ -184,14 +190,13 @@ for N in $(sort -n /tmp/lines.tmp); do
   ### screen print outs
   echo -e "echo \"   - file: download_${TYPE}${Z}${I}\tline number: $N\"" >>${SHFILE}
   echo -e "sleep 1s" >>${SHFILE}
-
   ### download line
   echo -e " curl -N -# '${URL_PT1}${ACCDIC[$N]}${URL_PT2}' >> ${DBFILE}" >>${SHFILE};
   TMP+="${ACCDIC[$N]},"
   echo -e "\t...line number ${LN}";
   ((LN++))
 done
-rm -f /tmp/lines.tmp
+rm -f ${LINES}
 
 ### appending to the bottom of the file download checking function
 echo -en "if [[ -e \"${WDIR}/check_download.sh\" ]]; then\n eval ${WDIR}/check_download.sh ${DBFILE} ${PER_LINE} ${OUT} ${DB} ${TYPE} ${MODE} '" >>${SHFILE}
@@ -201,6 +206,7 @@ chmod a=rwx ${SHFILE}
 ################
 ### Downloading
 ################
+
 if [[ ${DOWNLOAD} -eq 1 ]]; then
  echo -e "-> Downloading..."
  if [[ ${MULTI_THREADING} -eq 1 ]]; then ls ${WDIR}/download_*.sh | parallel -j ${NTHR} -n 1 -I % "eval %"; fi
