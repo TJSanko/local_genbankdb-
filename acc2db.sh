@@ -8,9 +8,6 @@
 ###  directory for the list files
 ###  runs on Linux/Unix systems only
 ###
-###  usage: ./acc2db.sh file.lst
-###         '-h' or '--help' as argument prints usage
-###
 ###  Date:01.07.2025        Created by T.J.Sanko
 ###                                    (CERI SA)
 ###
