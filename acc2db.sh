@@ -58,7 +58,7 @@ DOWNLOAD=0
 ### Clean up after I am done - delete files it created?: 1 => Yes; 0 => No
 CLEAN=0
 ### Divide every N-lines per file (max 500)
-PER_FILE=50
+PER_FILE=500
 ### No. of accession numbers downloaded at once (max. 300)
 PER_LINE=300
 ### NCBI database to download from: nuccore, protein, pubmed
