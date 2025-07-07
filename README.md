@@ -1,1 +1,72 @@
-<p>########################################################################<br />SYNOPIS:<br />&nbsp; &nbsp; Scripts for automatic download genbank records based on file with<br />&nbsp; &nbsp; list of accessionn numbers (or directory with those files).<br />&nbsp; &nbsp; The files have to have '.lst' extension. Furthermore it allows to&nbsp;<br />&nbsp; &nbsp; dived the genbank files into genes and genome sequences and taxonomy<br />&nbsp; &nbsp; table adapted for blast or qiime2 classifier analysis.<br />########################################################################<br /><br />DATE:&nbsp; &nbsp; 01.07.2025<br />VERSION: 1.0<br />CREATOR: T.J.SANKO<br />ADDRESS: Stellenbosch University, Tygerberg Campus,<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Francie van Zijl Drive, Cape Town, South Africa<br />CONTACT: tjsanko@sun.ac.za<br /><br />1. Requirements<br />&nbsp; &nbsp;Script is design to work on any Linux machine with bash/shell language.<br />&nbsp; &nbsp;It was tested on CentOS7 and Ubuntu SMP 24.04.2.<br /><br />2. Installation<br />&nbsp; &nbsp;Uses basic bash/shell commands. Does not require any additional installation.<br />&nbsp; &nbsp;May require changing permissions after downloading to linux/unix environment<br />&nbsp; &nbsp;chmod +x *.sh<br /><br />3. Syntax<br />&nbsp; &nbsp;./acc2db.sh -i file.lst -D -C<br />&nbsp;<br />&nbsp; &nbsp;or alternative:<br />&nbsp; &nbsp;./acc2db.sh --dir -D -C<br /><br />4. Options:<br />&nbsp; &nbsp;Required:<br />&nbsp; &nbsp; &nbsp;-i&nbsp; | --infile&nbsp; &nbsp; &nbsp;input file with accession number as a list. Has to have<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; '.lst' extension. Overrides '--dir' option.<br /><br />&nbsp; &nbsp; &nbsp;-d&nbsp; | --dir&nbsp; &nbsp; &nbsp; &nbsp; Alternative to '-i' option. Does not require any<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; parameters. Searches through current directory.<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Inferrior to '-i' and cannot be used together with that<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; option.<br /><br />&nbsp; &nbsp;Optional:<br />&nbsp; &nbsp; &nbsp;-D&nbsp; | --download&nbsp; &nbsp;Automatically downloads the files, else it creates<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; script that can be use to download manually<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (default: OFF)<br /><br />&nbsp; &nbsp; &nbsp;-C&nbsp; | --clean&nbsp; &nbsp; &nbsp; Automatically remove all intermediate file, else it<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; preserves them (default: OFF)<br /><br />&nbsp; &nbsp; &nbsp;-v&nbsp; | --version&nbsp; &nbsp; prints current version<br /><br />&nbsp; &nbsp; &nbsp;-h&nbsp; | --help&nbsp; &nbsp; &nbsp; &nbsp;prints this message<br /><br />5. Description<br />&nbsp; &nbsp; acc2db script takes as input list of accession numbers. The list has to be<br />&nbsp; &nbsp; in file and has to have '.lst' extension. Alternatively, instead a file,<br />&nbsp; &nbsp; current directory can be provided by passing the '-d' parameter. It does&nbsp;<br />&nbsp; &nbsp; not search recursively (limited depth to one level only). If both, '-d' and<br />&nbsp; &nbsp; '-i' are provided, '-i' takes priority. The '-d' parameter allows for more<br />&nbsp; &nbsp; than one list to be used as long as it is in the current directory. After<br />&nbsp; &nbsp; all lists are read, all duplicated accessions are removed and only unique<br />&nbsp; &nbsp; numbers are divided into download lines and saved in 'download_TTTTNN.sh'<br />&nbsp; &nbsp; files. Each file has max 300 accession numbers per line, max 500 lines per<br />&nbsp; &nbsp; file. TTTT in the name is the file format to download (e.g. gb, gff, asn1,<br />&nbsp; &nbsp; json) and NN is the consecutive number. If '-D' parameter is not provided<br />&nbsp; &nbsp; the files will be created with instructions inside on hot to run them<br />&nbsp; &nbsp; manually. Last line in each file checks if 'check_download' script exists<br />&nbsp; &nbsp; in current location, and pass list of accessions, from all lines in the<br />&nbsp; &nbsp; file. It will be used for redonload of the record if it was not successful<br />&nbsp; &nbsp; in the first round. Each 'download_TTTTNN.sh' file will pull records per&nbsp;<br />&nbsp; &nbsp; all lines and will save them under 'current_dir/ncbi_sl' directory.&nbsp;<br />&nbsp; &nbsp; Successful download and (eventual) download of failed records will be<br />&nbsp; &nbsp; mereged into one file 'ncbi_DDD.TTTT' where DDD is the name of the database<br />&nbsp; &nbsp; and TTTT is format of files downloaded. If '-C' option is provided it will<br />&nbsp; &nbsp; clean up after whole process removing the 'download_TTTTNN.sh' files and<br />&nbsp; &nbsp; 'current_dir/ncbi_dl' folder leaving only the final file.<br /><br />6. Personalization<br />&nbsp; &nbsp; Some of the defaults can be edited to suit better the needs of the user.<br />&nbsp; &nbsp; The defaults that can be adapted are:<br />&nbsp; &nbsp; PER_FILE&nbsp; &nbsp; &nbsp; &nbsp; Divides every N-download lines per file (default 500)<br />&nbsp; &nbsp; PER_LINE&nbsp; &nbsp; &nbsp; &nbsp; No. of accession numbers downloaded at once per line<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (default 300). Do not exceed over 300 else it will block<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; the connection to NCBI and you will end with many failed<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; downloads<br />&nbsp; &nbsp; DB&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; NCBI database to download from: nuccore, protein, pubmed<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (default 'nuccore')<br />&nbsp; &nbsp; TYPE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; database format: gb, gff, asn1, json (default 'gb')<br />&nbsp; &nbsp; MODE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; database mode: text, summary (default 'text')<br />&nbsp; &nbsp; OUT&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; output directory name (default 'current_dir/ncbi_dl')<br /><br /></p>
+<p><h3>SYNOPIS:</h3>
+&emsp;Scripts for automatic download genbank records based on file with list of accessionn numbers (or directory with those files).</br>
+&emsp;The files have to have '.lst' extension. Furthermore it allows to dived the genbank files into genes and genome sequences</br>
+&emsp;and taxonomy table adapted for blast or qiime2 classifier analysis.</p>
+<p>
+&emsp; DATE:   &emsp; &emsp; &nbsp;01.07.2025<br />
+&emsp; VERSION:&emsp; 1.0<br />
+&emsp; CREATOR:&emsp; T.J.SANKO<br />
+&emsp; ADDRESS:&emsp; Stellenbosch University, Tygerberg Campus,<br />
+        &emsp; &emsp; &emsp; &emsp; &emsp; &nbsp; Francie van Zijl Drive, Cape Town, South Africa<br />
+&emsp; CONTACT:&emsp; tjsanko@sun.ac.za<br />
+
+<h3>1. Requirements</h3>
+&emsp; Script is design to work on any Linux machine with bash/shell language.</br>
+&emsp; It was tested on CentOS7 and Ubuntu SMP 24.04.2.</br>
+
+<h3>2. Installation</h3>
+&emsp; Uses basic bash/shell commands. Does not require any additional installation.</br>
+&emsp; May require changing permissions after downloading to linux/unix environment</br>
+&emsp; <pre>chmod +x *.sh</pre>
+
+<h3>3. Syntax</h3>
+<pre>./acc2db.sh -i file.lst -D -C</pre>
+&ensp;or alternative:<br />
+<pre>&emsp;./acc2db.sh --dir -D -C</pre>
+
+<h3>4. Options</h3><pre>
+  <b>Required:</b>
+    -i | --infile       input file with accession number as a list. Has to have
+                       '.lst' extension. Overrides '--dir' option.</br>
+    -d | --dir          Alternative to '-i' option. Does not require any
+                        parameters. Searches through current directory.
+                        Inferrior to '-i' and cannot be used together with that
+                        option.
+  <b>Optional:</b>
+    -D | --download     Automatically downloads the files, else it creates
+                        script that can be use to download manually
+                        (default: OFF)</br>
+    -C | --clean        Automatically remove all intermediate file, else it
+                        preserves them (default: OFF)</br>
+    -v | --version      prints current version</br>
+    -h | --help         prints this message
+</pre>
+
+<h3>5. Description</h3>
+&emsp; acc2db script takes as input list of accession numbers. The list has to be in file and has to have '.lst' extension. </br>
+&emsp; Alternatively, instead a file, current directory can be provided by passing the '-d' parameter. It does not search </br>
+&emsp; recursively (limited depth to one level only). If both, '-d' and '-i' are provided, '-i' takes priority. The '-d'</br>
+&emsp; parameter allows for more than one list to be used as long as it is in the current directory. After all lists are read,</br>
+&emsp; all duplicated accessions are removed and only unique numbers are divided into download lines and saved in</br>
+&emsp; 'download_TTTTNN.sh' files. Each file has max 300 accession numbers per line, max 500 lines per file. TTTT in the name</br>
+&emsp; is the file format to download (e.g. gb, gff, asn1, json) and NN is the consecutive number. If '-D' parameter is not</br>
+&emsp; provided the files will be created with instructions inside on hot to run them manually. Last line in each file checks</br>
+&emsp; if 'check_download' script exists in current location, and pass list of accessions, from all lines in the file. It will</br>
+&emsp; be used for redonload of the record if it was not successful in the first round. Each 'download_TTTTNN.sh' file will</br>
+&emsp; pull records per all lines and will save them under 'current_dir/ncbi_sl' directory.&nbsp; Successful download and</br>
+&emsp; (eventual) download of failed records will be mereged into one file 'ncbi_DDD.TTTT' where DDD is the name of the</br>
+&emsp; database and TTTT is format of files downloaded. If '-C' option is provided it will clean up after whole process</br>
+&emsp; removing the 'download_TTTTNN.sh' files and 'current_dir/ncbi_dl' folder leaving only the final file.</br>
+
+<h3>6. Personalization</h3>
+&emsp;Some of the defaults can be edited to suit better the needs of the user.<br />
+&emsp;The defaults that can be adapted are:</br>
+
+<table style="width:100%"> 
+<tr><td>PER_FILE</td><td>Divides every N-download lines per file (default 500)</td></tr>
+<tr><td>PER_LINE</td><td>No. of accession numbers downloaded at once per line (default 300). Do not exceed over 300 else it will block the connection to NCBI and you will end with many failed downloads</td></tr>
+<tr><td>DB </td><td>NCBI database to download from: nuccore, protein, pubmed (default 'nuccore')</td></tr>
+<tr><td>TYPE</td><td>database format: gb, gff, asn1, json (default 'gb')</td></tr>
+<tr><td>MODE</td><td>database mode: text, summary (default 'text')</td></tr>
+<tr><td>OUT</td><td>output directory name (default 'current_dir/ncbi_dl')</td></tr>
+</table></p></br>
