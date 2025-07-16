@@ -21,7 +21,7 @@
 &emsp; <pre>chmod +x *.sh</pre>
 
 <h3>3. Syntax</h3>
-<pre>./acc2db.sh -i file.lst -D -C</pre>
+<code>./acc2db.sh -i file.lst -D -C</code><br>
 &ensp;or alternative:<br />
 <pre>&emsp;./acc2db.sh --dir -D -C</pre>
 
