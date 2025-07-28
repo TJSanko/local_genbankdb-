@@ -64,7 +64,7 @@
 &emsp;The defaults that can be adapted are:</br>
 
 <table style="width:100%"> 
-<tr><td>PER_FILE</td><td>ivides files in N-download lines per file (default 500)</td></tr>
+<tr><td>PER_FILE</td><td>Divides files in N-download lines per file (default 500)</td></tr>
 <tr><td>PER_LINE</td><td>No. of accession numbers downloaded at once per line (default 300). Do not exceed over 300 else it will block the connection to NCBI and you will end with many failed downloads</td></tr>
 <tr><td>DB </td><td>NCBI database to download from: nuccore, protein, pubmed (default 'nuccore')</td></tr>
 <tr><td>TYPE</td><td>database format: gb, gff, asn1, json (default 'gb')</td></tr>
