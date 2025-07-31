@@ -1,4 +1,4 @@
-<p><h3>SYNOPIS:</h3>
+<p><h3>DESCRIPTION:</h3>
 &emsp;Scripts for automatic download genbank records based on file with list of accessionn numbers (or directory with those files).</br>
 &emsp;The files have to have '.lst' extension. Furthermore it allows to dived the genbank files into genes and genome sequences</br>
 &emsp;and taxonomy table adapted for blast or qiime2 classifier analysis.</p>
